@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"geyashi.github.io","root":"/","images":"/images","scheme":"Gemini","version":"8.6.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="摘要：进程是一个具有一定独立功能的程序在某个数据集合上的一次动态执行过程（运行活动），是系统进行资源分配和调度的独立单位。进程是正在运行程序的抽象。线程（Thread）是进程重要的组成部分，是轻量级进程，在进程当中是一条指令执行控制流。一个进程中有多个线程，线程共享所属进程所拥有的资源。进程和线程都有运行态、就绪态、等待态、挂起态。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程和线程">
+<meta property="og:url" content="https://geyashi.github.io/2021/07/04/process-thread/index.html">
+<meta property="og:site_name" content="geyashi&#39;s Blog">
+<meta property="og:description" content="摘要：进程是一个具有一定独立功能的程序在某个数据集合上的一次动态执行过程（运行活动），是系统进行资源分配和调度的独立单位。进程是正在运行程序的抽象。线程（Thread）是进程重要的组成部分，是轻量级进程，在进程当中是一条指令执行控制流。一个进程中有多个线程，线程共享所属进程所拥有的资源。进程和线程都有运行态、就绪态、等待态、挂起态。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/process.png">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E5%88%86%E7%B1%BB.svg">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E5%9B%BE.svg">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F.svg">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B.svg">
+<meta property="og:image" content="https://geyashi.github.io/2021/07/04/process-thread/%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB.svg">
+<meta property="article:published_time" content="2021-07-04T03:01:42.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:43:59.416Z">
+<meta property="article:author" content="geyashi">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://geyashi.github.io/2021/07/04/process-thread/process.png">
+
+
+<link rel="canonical" href="https://geyashi.github.io/2021/07/04/process-thread/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://geyashi.github.io/2021/07/04/process-thread/","path":"2021/07/04/process-thread/","title":"进程和线程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>进程和线程 | geyashi's Blog</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">geyashi's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%BF%9B%E7%A8%8B"><span class="nav-text">1. 进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E8%BF%9B%E7%A8%8B%E5%AE%9A%E4%B9%89"><span class="nav-text">1.1 进程定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%84%E6%88%90%E5%92%8C%E5%88%86%E7%B1%BB"><span class="nav-text">1.2 进程的组成和分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%8C%BA%E5%88%AB%E5%92%8C%E8%81%94%E7%B3%BB"><span class="nav-text">1.3 进程与程序的区别和联系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-text">1.4 进程的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8E%A7%E5%88%B6%E7%BB%93%E6%9E%84"><span class="nav-text">1.5 进程的控制结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-1-%E8%BF%9B%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%9D%97%EF%BC%88Process-Control-Block%EF%BC%8CPCB%EF%BC%89"><span class="nav-text">1.5.1 进程控制块（Process Control Block，PCB）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-2-%E8%BF%9B%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%9D%97%E5%8C%85%E5%90%AB%E5%93%AA%E4%BA%9B%E4%BF%A1%E6%81%AF"><span class="nav-text">1.5.2 进程控制块包含哪些信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-3-%E8%BF%9B%E7%A8%8B%E6%8E%A7%E5%88%B6%E5%9D%97%EF%BC%88PCB%EF%BC%89%E7%9A%84%E7%BB%84%E7%BB%87%E6%96%B9%E5%BC%8F"><span class="nav-text">1.5.3 进程控制块（PCB）的组织方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-6-%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%94%9F%E5%91%BD%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="nav-text">1.6 进程的生命期管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-1-%E8%BF%9B%E7%A8%8B%E5%88%9B%E5%BB%BA"><span class="nav-text">1.6.1 进程创建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-2-%E8%BF%9B%E7%A8%8B%E8%BF%90%E8%A1%8C"><span class="nav-text">1.6.2 进程运行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-3-%E8%BF%9B%E7%A8%8B%E7%AD%89%E5%BE%85%EF%BC%88%E9%98%BB%E5%A1%9E%EF%BC%89"><span class="nav-text">1.6.3 进程等待（阻塞）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-4-%E8%BF%9B%E7%A8%8B%E5%94%A4%E9%86%92"><span class="nav-text">1.6.4 进程唤醒</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-5-%E8%BF%9B%E7%A8%8B%E7%BB%93%E6%9D%9F"><span class="nav-text">1.6.5 进程结束</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-7-%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E5%8F%98%E5%8C%96%E6%A8%A1%E5%9E%8B"><span class="nav-text">1.7 进程状态变化模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%BA%BF%E7%A8%8B"><span class="nav-text">2. 线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%BA%BF%E7%A8%8B%EF%BC%88Thread%EF%BC%89"><span class="nav-text">2.1 什么是线程（Thread）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-text">2.2 线程的优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E7%BA%BF%E7%A8%8B%E5%92%8C%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">2.3 线程和进程的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-text">2.4 线程的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-1-%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%EF%BC%88User-Level-Thread%EF%BC%89"><span class="nav-text">2.4.1 用户级线程（User Level Thread）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-2-%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%EF%BC%88Kernel-Level-Thread%EF%BC%89"><span class="nav-text">2.4.2 内核级线程（Kernel Level Thread）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-3-%E6%B7%B7%E5%90%88%E6%A8%A1%E5%9E%8B"><span class="nav-text">2.4.3 混合模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6"><span class="nav-text">2.5 进程调度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-1-%E8%B0%83%E5%BA%A6%E6%97%B6%E6%9C%BA"><span class="nav-text">2.5.1 调度时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-2-%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2%EF%BC%88Context-Switch%EF%BC%89"><span class="nav-text">2.5.2 上下文切换（Context Switch）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-3-%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="nav-text">2.5.3 调度算法</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="geyashi"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">geyashi</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/geyashi" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;geyashi" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:weiwqqi@163.com" title="E-Mail → mailto:weiwqqi@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+          </div>
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://geyashi.github.io/2021/07/04/process-thread/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="geyashi">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="geyashi's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          进程和线程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-04 11:01:42" itemprop="dateCreated datePublished" datetime="2021-07-04T11:01:42+08:00">2021-07-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-05 15:43:59" itemprop="dateModified" datetime="2021-07-05T15:43:59+08:00">2021-07-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>摘要：进程是一个具有一定独立功能的程序在某个数据集合上的一次动态执行过程（运行活动），是系统进行资源分配和调度的独立单位。进程是正在运行程序的抽象。线程（Thread）是进程重要的组成部分，是轻量级进程，在进程当中是一条指令执行控制流。一个进程中有多个线程，线程共享所属进程所拥有的资源。进程和线程都有运行态、就绪态、等待态、挂起态。</p>
+<span id="more"></span>
+
+<h2 id="1-进程"><a href="#1-进程" class="headerlink" title="1. 进程"></a>1. 进程</h2><h3 id="1-1-进程定义"><a href="#1-1-进程定义" class="headerlink" title="1.1 进程定义"></a>1.1 进程定义</h3><p><strong>为什么要有进程？</strong></p>
+<p>早先的操作系统是单道批处理的，但是cpu是高效率的，而IO是低速的，就会出现cpu要等待IO的情况；从而降低了实际效率。后来就引入多道批处理；而程序在执行的过程中又会因为共享资源而导致程序在执行的过程中相互限制；所有后来引入进程用来给程序提供一个抽象的概念，他能申请道系统资源并且独立给程序提供资源，从而解决原来的程序之间因为资源共享而相互限制的问题。这样就可以提高系统资源的利用率以及系统的处理能力。</p>
+<p>直观上，进程（Process）是运行的程序。</p>
+<p>具体上，进程是一个具有一定独立功能的程序在某个数据集合上的一次动态执行过程（运行活动），是系统进行资源分配和调度的独立单位。进程是正在运行程序的抽象。进程的执行功能是由程序代码决定的。进程也被称为任务（Task or Job）。</p>
+<div style="zoom:50%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/process.png" class="" title="进程">
+</div>
+
+
+<h3 id="1-2-进程的组成和分类"><a href="#1-2-进程的组成和分类" class="headerlink" title="1.2 进程的组成和分类"></a>1.2 进程的组成和分类</h3><ol>
+<li>程序代码：一个进程需要执行的代码。</li>
+<li>程序处理的数据：一个进程运行时，需要有处理的数据，数据放在内存中。</li>
+<li>程序计数器的值，指示CPU下一条将要执行的指令：CPU需要知道现在要执行哪一条指令。</li>
+<li>一组通用寄存器的当前值：如指令寄存器、程序计数器、 程序状态字、栈指针、通用寄存器。</li>
+<li>一组系统资源：如 打开的文件。</li>
+</ol>
+<p>总之，进程包含了正在运行的一个程序的所有状态信息。</p>
+<p>分类：</p>
+<div style="zoom:80%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E5%88%86%E7%B1%BB.svg" class="" title="进程分类">
+</div>
+
+
+<h3 id="1-3-进程与程序的区别和联系"><a href="#1-3-进程与程序的区别和联系" class="headerlink" title="1.3 进程与程序的区别和联系"></a>1.3 进程与程序的区别和联系</h3><p><strong>区别</strong></p>
+<ol>
+<li>进程是动态地，程序是静态的。程序是有序代码的集合。进程是程序的执行，进程有内核态/用户态的区分。</li>
+<li>进程是暂时的（有生命周期），程序是永久的。进程是一个状态变化的过程。只要硬盘不遭到破坏，程序就可以长久保存。</li>
+<li>进程具有可以创建其他进程的功能，而程序没有。</li>
+<li>一个程序对应多个进程。</li>
+<li>进程的组成包括程序、数据和进程控制块（Process Control Block，PCB）（即进程的状态信息）。</li>
+</ol>
+<p><strong>联系</strong></p>
+<ol>
+<li>程序是产生进程的基础。进程执行的功能在程序中都有具体的描述，并且受限于程序的代码。</li>
+<li>程序的每次运行构成不同的进程。运行的程序在内存中处理的数据是不一样的，获得的资源也是不一样的，得到的效率就不一样。</li>
+<li>进程是程序功能的体现。</li>
+<li>通过多次运次，一个程序对应多个进程；通过调用关系，一个进程包括多个程序。</li>
+</ol>
+<h3 id="1-4-进程的特点"><a href="#1-4-进程的特点" class="headerlink" title="1.4 进程的特点"></a>1.4 进程的特点</h3><ol>
+<li><p>动态性：可以动态地创建、结束进程。</p>
+</li>
+<li><p>并发性：进程可以被独立地调度并占用CPU运行。</p>
+</li>
+<li><p>独立性：不同进程的工作不相互影响。</p>
+<p> 不影响：OS会不停地调度不同的进程执行，所以进程的执行时间可能会受到其他进程的影响，但是进程执行的结果是正确的。</p>
+<p> 如何保证进程执行的结果正确？页表</p>
+<p> OS通过页表可以使不同的进程访问不同的地址空间。如果超过地址空间会产生页异常、页错误。OS给每一个进程分配一个页表，让每个进程在独立的地址空间上运行。</p>
+</li>
+<li><p>制约性：由访问共享数据/资源或进程间同步而产生的。</p>
+</li>
+</ol>
+<h3 id="1-5-进程的控制结构"><a href="#1-5-进程的控制结构" class="headerlink" title="1.5 进程的控制结构"></a>1.5 进程的控制结构</h3><h4 id="1-5-1-进程控制块（Process-Control-Block，PCB）"><a href="#1-5-1-进程控制块（Process-Control-Block，PCB）" class="headerlink" title="1.5.1 进程控制块（Process Control Block，PCB）"></a>1.5.1 进程控制块（Process Control Block，PCB）</h4><p>进程控制块（PCB）是OS管理控制进程运行所用的信息集合，是OS用于管理控制进程的一个专门数据结构。PCB记录着进程的基本情况，描述进程动态运行变化的过程。PCB是进程存在的唯一标志。（一一对应）。OS为进程生成一个唯一的PCB，意味着该进程创建。OS通过管理PCB来管理进程。OS回收PCB，意味着进程结束。</p>
+<h4 id="1-5-2-进程控制块包含哪些信息"><a href="#1-5-2-进程控制块包含哪些信息" class="headerlink" title="1.5.2 进程控制块包含哪些信息"></a>1.5.2 进程控制块包含哪些信息</h4><ol>
+<li>进程描述信息。一个PCB唯一表示了一个进程，是进程的一个唯一的标识。通过PCB，OS可以识别出该进程正在执行哪一个程序，这个程序了几次。<ul>
+<li>进程标识符（Process Identifier，PID）：唯一，通常是一个整数。</li>
+<li>进程名：通常基于可执行文件名，不唯一。</li>
+<li>用户标识符（User Identifier，UID）：记录创建该进程的用户信息。</li>
+<li>进程组关系：记录子进程、父进程、兄弟姐妹进程的关系信息。</li>
+</ul>
+</li>
+<li>进程的控制信息<ul>
+<li>当前状态</li>
+<li>进程优先级（Priority）</li>
+<li>代码执行入口地址</li>
+<li>可执行程序的硬盘地址</li>
+<li>运行统计信息（执行时间、页面调度）</li>
+<li>进程间同步和通信</li>
+<li>进程的队列指针</li>
+<li>进程的消息队列指针</li>
+</ul>
+</li>
+<li>进程所有的资源和使用情况<ul>
+<li>虚拟地址空间的情况</li>
+<li>打开文件列表</li>
+</ul>
+</li>
+<li>CPU现场信息<ul>
+<li>用户可见寄存器：计算数据的寄存器，地址寄存器等。</li>
+<li>控制和状态寄存器：程序计数器（PC）、程序状态字（PSW）等。</li>
+<li>栈指针：进程调用/系统调用/中断处理和返回时需要使用栈指针。</li>
+<li>调度和状态信息：OS调度进程的状态（就绪、运行、阻塞）占用CPU资源的信息。</li>
+<li>指向该进程页表的指针。</li>
+</ul>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Process management</th>
+<th>Memory management</th>
+<th>File management</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Register</td>
+<td>Pointer to text segment</td>
+<td>Root directory</td>
+</tr>
+<tr>
+<td>Program Counter(PC)</td>
+<td>Pointer to data segment</td>
+<td>Working directory</td>
+</tr>
+<tr>
+<td>Program Status Word(PSW)</td>
+<td>Pointer to stack segment</td>
+<td>File description</td>
+</tr>
+<tr>
+<td>Stack Pointer(SP)</td>
+<td></td>
+<td>User ID</td>
+</tr>
+<tr>
+<td>Process status</td>
+<td></td>
+<td>Group ID</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Process ID</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Parents group</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Signals</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Time when process started</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>CPU time used</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Children’s CPU time</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Time of next alarm</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="1-5-3-进程控制块（PCB）的组织方式"><a href="#1-5-3-进程控制块（PCB）的组织方式" class="headerlink" title="1.5.3 进程控制块（PCB）的组织方式"></a>1.5.3 进程控制块（PCB）的组织方式</h4><p>链表：动态过程。适合频繁创建结束进程。同一个状态的进程PCB组成一个链表。多个状态对应多种不同的链表，如就绪链表、运行链表和阻塞列表。</p>
+<p>索引表：适合不频繁创建结束进程。</p>
+<h3 id="1-6-进程的生命期管理"><a href="#1-6-进程的生命期管理" class="headerlink" title="1.6 进程的生命期管理"></a>1.6 进程的生命期管理</h3><p>进程的生命期：进程创建、进程运行、进程阻塞、进程唤醒、进程结束。</p>
+<h4 id="1-6-1-进程创建"><a href="#1-6-1-进程创建" class="headerlink" title="1.6.1 进程创建"></a>1.6.1 进程创建</h4><ol>
+<li>OS对初始化进程的数据、PCB、准备相关资源，就是进程的创建。</li>
+<li>进程创建的时机：<ol>
+<li>系统初始时。</li>
+<li>用户请求创建一个新进程时。</li>
+<li>正在运行的进程执行了创建进程的系统调用。</li>
+</ol>
+</li>
+</ol>
+<h4 id="1-6-2-进程运行"><a href="#1-6-2-进程运行" class="headerlink" title="1.6.2 进程运行"></a>1.6.2 进程运行</h4><p>OS通过调度算法选择一个处于就绪状态的进程，让它占用CPU资源执行，此时该进程进入运行状态。  </p>
+<h4 id="1-6-3-进程等待（阻塞）"><a href="#1-6-3-进程等待（阻塞）" class="headerlink" title="1.6.3 进程等待（阻塞）"></a>1.6.3 进程等待（阻塞）</h4><p>进程从运行状态进入阻塞状态的时机：</p>
+<ol>
+<li>请求并等待系统服务无法马上完成，如网络请求、IO。</li>
+<li>启动某种操作，无法马上完成，如协调其他进程。</li>
+<li>进程需要的数据没有到达。</li>
+</ol>
+<p>进程只能自己阻塞自己，因为只有进程自己才能知道何时需要阻塞。</p>
+<h4 id="1-6-4-进程唤醒"><a href="#1-6-4-进程唤醒" class="headerlink" title="1.6.4 进程唤醒"></a>1.6.4 进程唤醒</h4><p>进程唤醒的时机：</p>
+<ol>
+<li>被阻塞的进程需要的资源被满足。</li>
+<li>被阻塞的进程等待的事件到达。</li>
+<li>将被阻塞的进程的PCB插入到就绪队列。</li>
+</ol>
+<h4 id="1-6-5-进程结束"><a href="#1-6-5-进程结束" class="headerlink" title="1.6.5 进程结束"></a>1.6.5 进程结束</h4><p>正常退出（自愿）、异常退出（自愿）、致命错误退出（强制退出）、被其他进程所杀（强制退出）。</p>
+<div style="zoom:80%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E5%9B%BE.svg" class="" title="进程状态图">
+</div>
+
+
+<h3 id="1-7-进程状态变化模型"><a href="#1-7-进程状态变化模型" class="headerlink" title="1.7 进程状态变化模型"></a>1.7 进程状态变化模型</h3><ul>
+<li>创建态：创建了进程所必要工作（PID，PCB），尚未执行该进程。</li>
+<li>运行态（Running Status）：一个进程在CPU上运行的状态。</li>
+<li>就绪态（Ready Status）：一个进程获得了除CPU之外的一切所需资源，一旦得到CPU资源，即可进入运行状态。</li>
+<li>等待态（Waiting Status）：又称阻塞态，Blocked Status。一个进程正在等待某一事件而暂停执行的状态。</li>
+<li>挂起态（Suspend Status）：用于调节负载。进程不占用内存空间，该进程的映像位于磁盘上。将一部分空间导到硬盘上，有更多的空间给需要的进程使用。<ul>
+<li>阻塞挂起状态：进程在外存上，等待某个事件出现。</li>
+<li>就绪挂起状态：进程在外存上，但只要进入内存，即可运行。</li>
+</ul>
+</li>
+<li>终止态（Terminated Status）：终止执行后，进程进入该状态。进行数据统计工作，资源回收。</li>
+</ul>
+<blockquote>
+<p>七状态进程模型</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">stateDiagram-v2</span><br><span class="line">[*] --&gt; 创建</span><br><span class="line">创建 --&gt; 就绪: 提交</span><br><span class="line">创建 --&gt; 就绪挂起: 提交</span><br><span class="line">就绪 --&gt; 运行: 调度</span><br><span class="line">就绪 --&gt; 就绪挂起: 挂起</span><br><span class="line">运行 --&gt; 就绪挂起: 提交</span><br><span class="line">运行 --&gt; 就绪: 超时</span><br><span class="line">就绪挂起 --&gt; 就绪: 激活</span><br><span class="line">就绪挂起 --&gt; 阻塞挂起: 事件出现</span><br><span class="line">阻塞挂起 --&gt; 阻塞: 激活</span><br><span class="line">阻塞 --&gt; 阻塞挂起: 挂起</span><br><span class="line">阻塞 --&gt; 就绪: 事件出现</span><br><span class="line">运行 --&gt; 阻塞: 等待事件</span><br><span class="line">运行 --&gt; 终止: 释放</span><br><span class="line">终止 --&gt; [*]</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="2-线程"><a href="#2-线程" class="headerlink" title="2. 线程"></a>2. 线程</h2><h3 id="2-1-什么是线程（Thread）"><a href="#2-1-什么是线程（Thread）" class="headerlink" title="2.1 什么是线程（Thread）"></a>2.1 什么是线程（Thread）</h3><p>线程（Thread）是进程重要的组成部分，在进程当中是一条指令执行控制流。一个进程中有多个线程，线程共享所属进程所拥有的资源。进程是用来管理资源的，将进程的另一部分功能交给线程来管理。</p>
+<p>线程是轻量级进程。线程有自己的线程控制块（Thread Control Block， TCB）、程序计数器（PC）、栈指针（SP）、寄存器。</p>
+<p>线程 = 进程 - 共享资源 = 指令执行序列。</p>
+<p><strong>为什么要使用线程？</strong></p>
+<p>在以前的OS中，使用多进程处理。在多任务环境中，不可能让所有任务都排队，处理完前面的任务才能处理后面的任务。要让用户感觉到所有任务都在执行，CPU就必须在多个进程之间频繁切换。问题是进程切换很耗时。所以一般OS中进程数量不能多。为了解决这个限制，提出了线程的概念。线程既保留了并发优点，又解决了进程切换代价（共享相同的地址空间）。</p>
+<ul>
+<li>创建进程的开销较大：包括了数据、代码、堆、栈等。</li>
+<li>进程的隔离性过强：进程间通信开销较大。</li>
+<li>进程内部不支持并行。</li>
+</ul>
+<h3 id="2-2-线程的优缺点"><a href="#2-2-线程的优缺点" class="headerlink" title="2.2 线程的优缺点"></a>2.2 线程的优缺点</h3><p>优点</p>
+<ul>
+<li>一个进程中可以同时存在多个线程。线程作为上下文切换的单位，开销较小。</li>
+<li>各个线程之间可以并发地执行。</li>
+<li>各个线程可以共享相同的地址空间、文件等资源，这使得线程之间数据传输和数据交换更加便利。</li>
+</ul>
+<p>缺点</p>
+<p>一个线程崩溃，可能会破坏与其他线程共享的资源，可能会导致所属进程的其他线程崩溃。</p>
+<p><strong>什么时候用线程和进程？</strong></p>
+<p>高性能计算：强调性能，用线程。</p>
+<p>web浏览器：如果用多线程打开多个页面，可能某一个页面导致某个线程崩溃，进而引起整个浏览器崩溃。chriome浏览器采用的是一个进程打开一个页面。</p>
+<h3 id="2-3-线程和进程的区别"><a href="#2-3-线程和进程的区别" class="headerlink" title="2.3 线程和进程的区别"></a>2.3 线程和进程的区别</h3><ol>
+<li>进程是资源分配的单位，线程是CPU调度的单位。线程继承了早期线程CPU调度这一属性。</li>
+<li>进程拥有完整的资源，线程只能独占必不可少的资源（寄存器，栈指针）。</li>
+<li>线程同样有就绪态、运行态、阻塞态，同样具有状态转换关系。</li>
+<li>线程可以减少并发执行的时间和空间开销。<ul>
+<li>线程的创建时间比进程短。</li>
+<li>线程的终止时间比进程短。</li>
+<li>线程的上下文切换比进程快。</li>
+<li>线程之间通信无须调用内核。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-4-线程的实现方式"><a href="#2-4-线程的实现方式" class="headerlink" title="2.4 线程的实现方式"></a>2.4 线程的实现方式</h3><p>操作系统有两种CPU状态：</p>
+<ul>
+<li>内核态（Kernel Model，Supervisor Mode）：运行操作系统程序</li>
+<li>用户态（User Model）：运行用户程序</li>
+</ul>
+<p>用户态–&gt;内核态：中断/异常/陷入机制</p>
+<p>内核态–&gt;用户态：设置程序状态字</p>
+<div style="zoom:70%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F.svg" class="" title="进程的实现方式">
+</div>
+
+
+<h4 id="2-4-1-用户级线程（User-Level-Thread）"><a href="#2-4-1-用户级线程（User-Level-Thread）" class="headerlink" title="2.4.1 用户级线程（User Level Thread）"></a>2.4.1 用户级线程（User Level Thread）</h4><p>多个用户级线程对应一个内核级线程。</p>
+<ul>
+<li>完全建立在用户空间的线程库上。用户级线程的建立、同步、销毁和调度完全在用户态中完成，不需要内核的帮助。</li>
+<li>完全由<strong>运行时系统</strong>（Run-time System）管理。</li>
+<li>内核管理的还是进程，内核只能看到进程，不知道线程的存在。</li>
+</ul>
+<div style="zoom:80%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B.svg" class="" title="用户级线程">
+</div>
+
+<p>优点：</p>
+<ul>
+<li>线程切换快。</li>
+<li>解决了多对一模型中的可扩展性问题。</li>
+<li>调度算法是应用程序特定的，可以按照不同应用程序需求切换不同的线程。</li>
+<li>用户级线程可运行在任何操作系统上，只需要在操作系统上支持响应的线程库即可。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>内核只能将CPU分配给进程。同一个进程中有多个线程，即使有多个CPU，也无法将线程分配到多个CPU上。</li>
+<li>大多数系统调用时阻塞的。因此，内核阻塞整个进程，将会导致该进程的所有线程被阻塞。</li>
+<li>内核级线程数据量大，开销大。</li>
+</ul>
+<p>主流操作系统都采用一对一模型</p>
+<ul>
+<li>Windows、Linux、OS X。</li>
+</ul>
+<h4 id="2-4-2-内核级线程（Kernel-Level-Thread）"><a href="#2-4-2-内核级线程（Kernel-Level-Thread）" class="headerlink" title="2.4.2 内核级线程（Kernel Level Thread）"></a>2.4.2 内核级线程（Kernel Level Thread）</h4><p>线程由内核创建，线程相关信息存放在内核中。一个用户级线程对应一个内核级线程。</p>
+<ul>
+<li>内核管理所有线程，并向应用程序提供API接口。</li>
+<li>讷河维护进程和线程的上下文切换。</li>
+<li>线程的切换需要内核支持。</li>
+<li>以线程为基础进行调度。</li>
+</ul>
+<p>优点：内核管理简单。</p>
+<p>缺点：可扩展性差，无法适应多核CPU的发展。</p>
+<p>用于各种用户级线程库中。</p>
+<h4 id="2-4-3-混合模型"><a href="#2-4-3-混合模型" class="headerlink" title="2.4.3 混合模型"></a>2.4.3 混合模型</h4><p>N个用户级线程对应M个内核级线程（N &gt; M）</p>
+<ul>
+<li>线程创建在用户空间完成。</li>
+<li>线程调度等在内核态完成。</li>
+<li>多个用户线程通过<strong>多路复用</strong>多个内核级线程。</li>
+</ul>
+<p>优点：解决了可扩展性问题（多对一）和线程过多问题（一对一）。<br>缺点：管理更为复杂。</p>
+<ul>
+<li>Solaris在9之前使用该模型<ul>
+<li>9之后改为了一对一模型。</li>
+</ul>
+</li>
+<li>在虚拟化中得到了广泛应用。</li>
+</ul>
+<h3 id="2-5-进程调度"><a href="#2-5-进程调度" class="headerlink" title="2.5 进程调度"></a>2.5 进程调度</h3><p>CPU调度：按一定的<strong>调度算法</strong>从就绪队列中<strong>选择一个进程</strong>把CPU的使用权交给被选中的进程。其任务是控制、协调进程对CPU的竞争。</p>
+<p>CPU调度要解三个问题：</p>
+<ol>
+<li>调度算法：按什么原则选择下一个执行的进程。</li>
+<li>调度时机：何时进行选择。</li>
+<li>调度过程（上下文切换）：如何让被选中的进程在CPU上运行。</li>
+</ol>
+<h4 id="2-5-1-调度时机"><a href="#2-5-1-调度时机" class="headerlink" title="2.5.1 调度时机"></a>2.5.1 调度时机</h4><p>内核对中断/异常/系统调用处理后，返回到用户态时。</p>
+<ul>
+<li>进程正常终止、由于某种错误而终止。</li>
+<li>新进程创建、一个等待进程编程就绪态。</li>
+<li>当一个进程从运行态进入阻塞态。</li>
+<li>当一个进程从运行态进图就绪态。</li>
+</ul>
+<h4 id="2-5-2-上下文切换（Context-Switch）"><a href="#2-5-2-上下文切换（Context-Switch）" class="headerlink" title="2.5.2 上下文切换（Context Switch）"></a>2.5.2 上下文切换（Context Switch）</h4><p>进程切换就是一个进程先让出CPU，另一个进程占有CPU的过程。</p>
+<p>停止当前运行的进程（运行态–&gt;其他状态），并且调度其他进程（就绪态 –&gt;运行态）。</p>
+<ul>
+<li><p>进程运行时，其硬件状态保存在CPU上的寄存器（PC、PSW、SP、通用寄存器）中。</p>
+</li>
+<li><p>进程不运行时，这些寄存器的值保存在进程控制块（PCB）中。</p>
+</li>
+</ul>
+<p>进程切换主要包含两部分工作：</p>
+<ol>
+<li>切换全局页目录以加载一个新的地址空间。</li>
+<li>切换内核栈和硬件上下文，其中硬件上下文包括了内核执行新今晨需要的全部信息，如CPU相关寄存器。</li>
+</ol>
+<p>另外上下文切换是有开销的：</p>
+<ol>
+<li>直接开销：内核完成切换所用CPU时间。保存和恢复寄存器、切换地址空间都需要时间。</li>
+<li>简介开销：高速缓存（Cache）、缓冲区缓存（Buffer Cache）和TLB（Translation Lookup Buffer）失效。</li>
+</ol>
+<h4 id="2-5-3-调度算法"><a href="#2-5-3-调度算法" class="headerlink" title="2.5.3 调度算法"></a>2.5.3 调度算法</h4><p><strong>1. 调度算法衡量指标</strong></p>
+<ol>
+<li>吞吐量 Throughput：每单位时间完成的进程数目。</li>
+<li>周转时间TT（Turnaround Time）：每个进程从提出请求到运行完成的时间。</li>
+<li>响应时间RT（Response Time）：从提出请求到第一次回应的时间。</li>
+</ol>
+<p><strong>2. 调度算法分类</strong></p>
+<div style="zoom:80%;margin:0 auto;">
+<img src="/2021/07/04/process-thread/%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB.svg" class="" title="调度算法分类">
+</div>
+
+<p><strong>3. 时间片</strong>（Time slice或quantum）</p>
+<p>一个时间段，分配给调度CPU上的进程，确定了允许该进程运行的事件长度。</p>
+<p>选择时间片，需要考虑以下因素：</p>
+<ol>
+<li>进程切换的开销</li>
+<li>对响应时间的要求</li>
+<li>就绪进程的个数</li>
+<li>CPU的能力</li>
+<li>进程的行为</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+          </div>
+
+        
+
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+
+<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
